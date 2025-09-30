@@ -10,7 +10,7 @@ CREATE TABLE `user`
     `id`             bigint(20)   NOT NULL AUTO_INCREMENT COMMENT '主键id',
     `phone`          varchar(11)  NOT NULL COMMENT '手机号',
     `password`       varchar(128) NOT NULL DEFAULT '' COMMENT '密码',
-    `nick_name`      varchar(32)  NOT NULL DEFAULT '' COMMENT '昵称',
+    `nickname`       varchar(32)  NOT NULL DEFAULT '' COMMENT '昵称',
     `icon`           varchar(255) NOT NULL DEFAULT '' COMMENT '头像',
     `city`           varchar(64)  NULL COMMENT '所在城市',
     `introduce`      varchar(128) NULL COMMENT '个人介绍',

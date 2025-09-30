@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tiv.rating.system.mapper.ShopMapper">
+
+    <resultMap id="BaseResultMap" type="com.tiv.rating.system.entity.Shop">
+        <id property="id" column="id" jdbcType="BIGINT"/>
+        <result property="name" column="name" jdbcType="VARCHAR"/>
+        <result property="typeId" column="type_id" jdbcType="BIGINT"/>
+        <result property="area" column="area" jdbcType="VARCHAR"/>
+        <result property="address" column="address" jdbcType="VARCHAR"/>
+        <result property="latitude" column="latitude" jdbcType="DOUBLE"/>
+        <result property="longitude" column="longitude" jdbcType="DOUBLE"/>
+        <result property="avgPrice" column="avg_price" jdbcType="DOUBLE"/>
+        <result property="sold" column="sold" jdbcType="INTEGER"/>
+        <result property="commentCount" column="comment_count" jdbcType="INTEGER"/>
+        <result property="score" column="score" jdbcType="DOUBLE"/>
+        <result property="openHours" column="open_hours" jdbcType="VARCHAR"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,name,type_id,
+        area,address,latitude,
+        longitude,avg_price,sold,
+        comment_count,score,open_hours,
+        create_time,update_time
+    </sql>
+</mapper>
