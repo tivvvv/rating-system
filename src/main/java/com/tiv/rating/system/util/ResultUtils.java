@@ -11,6 +11,16 @@ public class ResultUtils {
     /**
      * 成功
      *
+     * @param <T>
+     * @return
+     */
+    public static <T> BusinessResponse<T> success() {
+        return new BusinessResponse<>(BusinessCodeEnum.SUCCESS.getCode(), null, BusinessCodeEnum.SUCCESS.getMessage());
+    }
+
+    /**
+     * 成功
+     *
      * @param data
      * @param <T>
      * @return
