@@ -2,8 +2,10 @@ package com.tiv.rating.system.controller;
 
 import com.tiv.rating.system.common.BusinessResponse;
 import com.tiv.rating.system.dto.LoginDTO;
+import com.tiv.rating.system.dto.UserDTO;
 import com.tiv.rating.system.service.UserService;
 import com.tiv.rating.system.util.ResultUtils;
+import com.tiv.rating.system.util.UserHolder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,6 +30,11 @@ public class UserController {
     public BusinessResponse<?> login(@RequestBody LoginDTO loginDTO, HttpSession session) {
         userService.login(loginDTO, session);
         return ResultUtils.success();
+    }
+
+    @GetMapping("/info")
+    public BusinessResponse<UserDTO> info(HttpSession session) {
+        return ResultUtils.success(UserHolder.getUser());
     }
 
 }
