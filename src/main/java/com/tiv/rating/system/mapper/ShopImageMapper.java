@@ -1,7 +1,7 @@
 package com.tiv.rating.system.mapper;
 
-import com.tiv.rating.system.entity.ShopImage;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.tiv.rating.system.entity.ShopImage;
 
 /**
  * @description 针对表【shop_image(店铺图片表)】的数据库操作Mapper

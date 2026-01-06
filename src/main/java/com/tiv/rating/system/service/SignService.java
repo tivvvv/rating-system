@@ -1,7 +1,7 @@
 package com.tiv.rating.system.service;
 
-import com.tiv.rating.system.entity.Sign;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.tiv.rating.system.entity.Sign;
 
 public interface SignService extends IService<Sign> {
 

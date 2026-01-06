@@ -1,7 +1,7 @@
 package com.tiv.rating.system.service;
 
-import com.tiv.rating.system.entity.Shop;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.tiv.rating.system.entity.Shop;
 
 public interface ShopService extends IService<Shop> {
 

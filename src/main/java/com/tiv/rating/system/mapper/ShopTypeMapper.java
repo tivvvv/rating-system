@@ -1,7 +1,7 @@
 package com.tiv.rating.system.mapper;
 
-import com.tiv.rating.system.entity.ShopType;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.tiv.rating.system.entity.ShopType;
 
 /**
  * @description 针对表【shop_type(店铺类型表)】的数据库操作Mapper
