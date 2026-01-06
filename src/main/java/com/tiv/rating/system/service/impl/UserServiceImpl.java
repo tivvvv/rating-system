@@ -1,9 +1,11 @@
 package com.tiv.rating.system.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.RandomUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.tiv.rating.system.common.Constants;
 import com.tiv.rating.system.dto.LoginDTO;
+import com.tiv.rating.system.dto.UserDTO;
 import com.tiv.rating.system.entity.User;
 import com.tiv.rating.system.enums.BusinessCodeEnum;
 import com.tiv.rating.system.mapper.UserMapper;
@@ -58,7 +60,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
 
         // 5. 保存用户信息到session中
-        session.setAttribute(Constants.USER, user);
+        session.setAttribute(Constants.USER, BeanUtil.copyProperties(user, UserDTO.class));
     }
 
     private User createUserWithPhone(String phone) {
