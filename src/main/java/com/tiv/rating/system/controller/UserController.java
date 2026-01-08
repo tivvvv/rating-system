@@ -10,7 +10,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpSession;
 
 @Slf4j
 @RestController
@@ -21,19 +20,18 @@ public class UserController {
     private UserService userService;
 
     @GetMapping("/code")
-    public BusinessResponse<?> sendCode(@RequestParam("phone") String phone, HttpSession session) {
-        userService.sendCode(phone, session);
+    public BusinessResponse<?> sendCode(@RequestParam("phone") String phone) {
+        userService.sendCode(phone);
         return ResultUtils.success();
     }
 
     @PostMapping("/login")
-    public BusinessResponse<?> login(@RequestBody LoginDTO loginDTO, HttpSession session) {
-        userService.login(loginDTO, session);
-        return ResultUtils.success();
+    public BusinessResponse<String> login(@RequestBody LoginDTO loginDTO) {
+        return ResultUtils.success(userService.login(loginDTO));
     }
 
     @GetMapping("/info")
-    public BusinessResponse<UserDTO> info(HttpSession session) {
+    public BusinessResponse<UserDTO> info() {
         return ResultUtils.success(UserHolder.getUser());
     }
 

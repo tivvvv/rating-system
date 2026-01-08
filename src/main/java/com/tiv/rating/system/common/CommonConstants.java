@@ -1,10 +1,8 @@
 package com.tiv.rating.system.common;
 
-public interface Constants {
+public interface CommonConstants {
 
-    String CODE = "code";
-
-    String USER = "user";
+    String AUTHORIZATION = "Authorization";
 
     String NICKNAME_PREFIX = "user_";
 

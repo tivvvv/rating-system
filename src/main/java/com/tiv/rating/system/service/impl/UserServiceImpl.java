@@ -1,9 +1,12 @@
 package com.tiv.rating.system.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.bean.copier.CopyOptions;
+import cn.hutool.core.lang.UUID;
 import cn.hutool.core.util.RandomUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.tiv.rating.system.common.Constants;
+import com.tiv.rating.system.common.CommonConstants;
+import com.tiv.rating.system.common.RedisConstants;
 import com.tiv.rating.system.dto.LoginDTO;
 import com.tiv.rating.system.dto.UserDTO;
 import com.tiv.rating.system.entity.User;
@@ -13,16 +16,23 @@ import com.tiv.rating.system.service.UserService;
 import com.tiv.rating.system.util.RegexUtils;
 import com.tiv.rating.system.util.ResultUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
-import javax.servlet.http.HttpSession;
+import javax.annotation.Resource;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
 
+    @Resource
+    private StringRedisTemplate stringRedisTemplate;
+
     @Override
-    public void sendCode(String phone, HttpSession session) {
+    public void sendCode(String phone) {
         // 1. 校验手机号格式
         if (!RegexUtils.isPhoneValid(phone)) {
             ResultUtils.error(BusinessCodeEnum.PARAMS_ERROR, "手机号格式错误");
@@ -31,15 +41,15 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         // 2. 生成验证码
         String code = RandomUtil.randomString(6);
 
-        // 3. 保存验证码到session中
-        session.setAttribute(Constants.CODE, code);
+        // 3. 保存验证码到redis中
+        stringRedisTemplate.opsForValue().set(String.format("%s_%s", RedisConstants.LOGIN_CODE, phone), code, 10, TimeUnit.MINUTES);
 
         // 4. 发送验证码
         log.debug("sendCode--手机号:{},验证码:{}", phone, code);
     }
 
     @Override
-    public void login(LoginDTO loginDTO, HttpSession session) {
+    public String login(LoginDTO loginDTO) {
         String phone = loginDTO.getPhone();
         // 1. 校验手机号格式
         if (!RegexUtils.isPhoneValid(phone)) {
@@ -47,8 +57,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
 
         // 2. 校验验证码
-        Object cacheCode = session.getAttribute(Constants.CODE);
-        if (cacheCode == null || !cacheCode.toString().equals(loginDTO.getCode())) {
+        String cacheCode = stringRedisTemplate.opsForValue().get(String.format("%s_%s", RedisConstants.LOGIN_CODE, phone));
+        if (cacheCode == null || !cacheCode.equals(loginDTO.getCode())) {
             ResultUtils.error(BusinessCodeEnum.PARAMS_ERROR, "验证码错误");
         }
 
@@ -59,14 +69,26 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             user = createUserWithPhone(phone);
         }
 
-        // 5. 保存用户信息到session中
-        session.setAttribute(Constants.USER, BeanUtil.copyProperties(user, UserDTO.class));
+        // 5. 生成随机token作为登录令牌
+        String token = UUID.randomUUID().toString(true);
+
+        // 6. 保存用户信息到redis中,以hash结构
+        UserDTO userDTO = BeanUtil.copyProperties(user, UserDTO.class);
+        Map<String, Object> userDTOMap = BeanUtil.beanToMap(userDTO, new HashMap<>(),
+                CopyOptions.create()
+                        .setIgnoreNullValue(true)
+                        .setFieldValueEditor((fieldName, fieldValue) -> fieldValue.toString()));
+        stringRedisTemplate.opsForHash().putAll(String.format("%s_%s", RedisConstants.LOGIN_TOKEN, token), userDTOMap);
+        stringRedisTemplate.expire(String.format("%s_%s", RedisConstants.LOGIN_TOKEN, token), 7, TimeUnit.DAYS);
+
+        // 7. 返回token
+        return token;
     }
 
     private User createUserWithPhone(String phone) {
         User user = User.builder()
                 .phone(phone)
-                .nickname(Constants.NICKNAME_PREFIX + RandomUtil.randomString(10))
+                .nickname(CommonConstants.NICKNAME_PREFIX + RandomUtil.randomString(10))
                 .build();
         save(user);
         return user;
