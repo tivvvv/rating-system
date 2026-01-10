@@ -6,4 +6,6 @@ public interface RedisConstants {
 
     String LOGIN_TOKEN = "login_token";
 
+    Integer LOGIN_TOKEN_TTL = 60;
+
 }

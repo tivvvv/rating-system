@@ -1,6 +1,7 @@
 package com.tiv.rating.system.config;
 
 import com.tiv.rating.system.interceptor.LoginInterceptor;
+import com.tiv.rating.system.interceptor.TokenRefreshInterceptor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -16,9 +17,12 @@ public class MvcConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(new LoginInterceptor(stringRedisTemplate))
+        registry.addInterceptor(new TokenRefreshInterceptor(stringRedisTemplate))
+                .order(0);
+        registry.addInterceptor(new LoginInterceptor())
                 // 不需要加上context-path
-                .excludePathPatterns("/user/code", "/user/login");
+                .excludePathPatterns("/user/code", "/user/login")
+                .order(1);
     }
 
 }
