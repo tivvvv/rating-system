@@ -8,4 +8,8 @@ public interface RedisConstants {
 
     Integer LOGIN_TOKEN_TTL = 60;
 
+    String SHOP = "shop";
+
+    Integer SHOP_TTL = 7;
+
 }

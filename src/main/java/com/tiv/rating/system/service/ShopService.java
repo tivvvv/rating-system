@@ -5,4 +5,6 @@ import com.tiv.rating.system.entity.Shop;
 
 public interface ShopService extends IService<Shop> {
 
+    Shop getShopById(String id);
+
 }
