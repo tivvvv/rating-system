@@ -30,12 +30,20 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements Sh
         if (StrUtil.isNotBlank(shopCache)) {
             return JSONUtil.toBean(shopCache, Shop.class);
         }
-        // 2. 缓存不存在,查询数据库
-        Shop shop = getById(id);
-        if (shop == null) {
+
+        // 2. 缓存命中空值
+        if (shopCache != null) {
             throw new BusinessException(BusinessCodeEnum.NOT_FOUND_ERROR, "店铺不存在");
         }
-        // 3. 缓存
+
+        // 3. 缓存不存在,查询数据库
+        Shop shop = getById(id);
+        if (shop == null) {
+            // 4. 数据库中不存在,将空值写入redis
+            stringRedisTemplate.opsForValue().set(shopKey, "", RedisConstants.NULL_TTL, TimeUnit.MINUTES);
+            throw new BusinessException(BusinessCodeEnum.NOT_FOUND_ERROR, "店铺不存在");
+        }
+        // 5. 缓存
         stringRedisTemplate.opsForValue().set(shopKey, JSONUtil.toJsonStr(shop), RedisConstants.SHOP_TTL, TimeUnit.MINUTES);
 
         return shop;

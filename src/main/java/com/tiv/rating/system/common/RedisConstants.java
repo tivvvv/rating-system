@@ -16,4 +16,6 @@ public interface RedisConstants {
 
     Integer SHOP_TYPE_TTL = 7;
 
+    Integer NULL_TTL = 3;
+
 }
