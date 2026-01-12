@@ -79,7 +79,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                         .setIgnoreNullValue(true)
                         .setFieldValueEditor((fieldName, fieldValue) -> fieldValue.toString()));
         stringRedisTemplate.opsForHash().putAll(String.format("%s_%s", RedisConstants.LOGIN_TOKEN, token), userDTOMap);
-        stringRedisTemplate.expire(String.format("%s_%s", RedisConstants.LOGIN_TOKEN, token), RedisConstants.LOGIN_TOKEN_TTL, TimeUnit.MINUTES);
+        stringRedisTemplate.expire(String.format("%s_%s", RedisConstants.LOGIN_TOKEN, token), RedisConstants.LOGIN_TOKEN_TTL + RandomUtil.randomInt(RedisConstants.LOGIN_TOKEN_TTL), TimeUnit.MINUTES);
 
         // 7. 返回token
         return token;

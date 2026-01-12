@@ -1,6 +1,7 @@
 package com.tiv.rating.system.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -42,7 +43,7 @@ public class ShopTypeServiceImpl extends ServiceImpl<ShopTypeMapper, ShopType> i
         // 3. 缓存
         stringRedisTemplate
                 .opsForValue()
-                .set(RedisConstants.SHOP_TYPE_LIST, JSONUtil.toJsonStr(typeList), RedisConstants.SHOP_TYPE_TTL, TimeUnit.DAYS);
+                .set(RedisConstants.SHOP_TYPE_LIST, JSONUtil.toJsonStr(typeList), RedisConstants.SHOP_TYPE_TTL + RandomUtil.randomInt(RedisConstants.SHOP_TYPE_TTL), TimeUnit.DAYS);
 
         return typeList;
     }

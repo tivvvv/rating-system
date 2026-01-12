@@ -1,5 +1,6 @@
 package com.tiv.rating.system.service.impl;
 
+import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -40,11 +41,11 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements Sh
         Shop shop = getById(id);
         if (shop == null) {
             // 4. 数据库中不存在,将空值写入redis
-            stringRedisTemplate.opsForValue().set(shopKey, "", RedisConstants.NULL_TTL, TimeUnit.MINUTES);
+            stringRedisTemplate.opsForValue().set(shopKey, "", RedisConstants.NULL_TTL + RandomUtil.randomInt(RedisConstants.NULL_TTL), TimeUnit.MINUTES);
             throw new BusinessException(BusinessCodeEnum.NOT_FOUND_ERROR, "店铺不存在");
         }
         // 5. 缓存
-        stringRedisTemplate.opsForValue().set(shopKey, JSONUtil.toJsonStr(shop), RedisConstants.SHOP_TTL, TimeUnit.MINUTES);
+        stringRedisTemplate.opsForValue().set(shopKey, JSONUtil.toJsonStr(shop), RedisConstants.SHOP_TTL + RandomUtil.randomInt(RedisConstants.SHOP_TTL), TimeUnit.MINUTES);
 
         return shop;
     }

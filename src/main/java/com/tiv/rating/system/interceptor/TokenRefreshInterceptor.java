@@ -2,6 +2,7 @@ package com.tiv.rating.system.interceptor;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.map.MapUtil;
+import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import com.tiv.rating.system.common.CommonConstants;
 import com.tiv.rating.system.common.RedisConstants;
@@ -46,7 +47,7 @@ public class TokenRefreshInterceptor implements HandlerInterceptor {
 
         // 4. 保存用户信息到ThreadLocal中
         UserHolder.saveUser(BeanUtil.fillBeanWithMap(userDTOMap, new UserDTO(), false));
-        stringRedisTemplate.expire(tokenKey, RedisConstants.LOGIN_TOKEN_TTL, TimeUnit.MINUTES);
+        stringRedisTemplate.expire(tokenKey, RedisConstants.LOGIN_TOKEN_TTL + RandomUtil.randomInt(RedisConstants.LOGIN_TOKEN_TTL), TimeUnit.MINUTES);
         return true;
     }
 
