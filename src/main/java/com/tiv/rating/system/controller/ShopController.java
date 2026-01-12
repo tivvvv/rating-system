@@ -5,10 +5,7 @@ import com.tiv.rating.system.entity.Shop;
 import com.tiv.rating.system.service.ShopService;
 import com.tiv.rating.system.util.ResultUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 
@@ -23,6 +20,12 @@ public class ShopController {
     @GetMapping("/{id}")
     public BusinessResponse<Shop> getShopById(@PathVariable String id) {
         return ResultUtils.success(shopService.getShopById(id));
+    }
+
+    @PutMapping
+    public BusinessResponse<?> updateShop(@RequestBody Shop shop) {
+        shopService.updateShop(shop);
+        return ResultUtils.success();
     }
 
 }

@@ -7,4 +7,6 @@ public interface ShopService extends IService<Shop> {
 
     Shop getShopById(String id);
 
+    void updateShop(Shop shop);
+
 }

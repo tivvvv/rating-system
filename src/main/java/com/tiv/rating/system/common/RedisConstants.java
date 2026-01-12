@@ -10,7 +10,7 @@ public interface RedisConstants {
 
     String SHOP = "shop";
 
-    Integer SHOP_TTL = 7;
+    Integer SHOP_TTL = 30;
 
     String SHOP_TYPE_LIST = "shop_type_list";
 

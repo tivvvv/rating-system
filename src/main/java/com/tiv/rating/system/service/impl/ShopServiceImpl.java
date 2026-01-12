@@ -11,6 +11,7 @@ import com.tiv.rating.system.mapper.ShopMapper;
 import com.tiv.rating.system.service.ShopService;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.concurrent.TimeUnit;
@@ -35,9 +36,23 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements Sh
             throw new BusinessException(BusinessCodeEnum.NOT_FOUND_ERROR, "店铺不存在");
         }
         // 3. 缓存
-        stringRedisTemplate.opsForValue().set(shopKey, JSONUtil.toJsonStr(shop), RedisConstants.SHOP_TTL, TimeUnit.DAYS);
+        stringRedisTemplate.opsForValue().set(shopKey, JSONUtil.toJsonStr(shop), RedisConstants.SHOP_TTL, TimeUnit.MINUTES);
 
         return shop;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void updateShop(Shop shop) {
+        Long shopId = shop.getId();
+        if (shopId == null) {
+            throw new BusinessException(BusinessCodeEnum.PARAMS_ERROR, "店铺id为空");
+        }
+
+        // 1. 更新数据库
+        updateById(shop);
+        // 2. 清除缓存
+        stringRedisTemplate.delete(String.format("%s_%s", RedisConstants.SHOP, shopId));
     }
 
 }
