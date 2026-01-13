@@ -9,4 +9,6 @@ public interface ShopService extends IService<Shop> {
 
     void updateShop(Shop shop);
 
+    void cacheShop(Long shopId, Long expireSeconds);
+
 }

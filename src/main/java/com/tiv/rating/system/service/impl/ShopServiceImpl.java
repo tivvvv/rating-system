@@ -7,6 +7,7 @@ import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.tiv.rating.system.common.BusinessException;
 import com.tiv.rating.system.common.RedisConstants;
+import com.tiv.rating.system.common.RedisData;
 import com.tiv.rating.system.entity.Shop;
 import com.tiv.rating.system.enums.BusinessCodeEnum;
 import com.tiv.rating.system.mapper.ShopMapper;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.time.LocalDateTime;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -98,6 +100,23 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements Sh
         updateById(shop);
         // 2. 清除缓存
         stringRedisTemplate.delete(String.format("%s_%s", RedisConstants.SHOP, shopId));
+    }
+
+    @Override
+    public void cacheShop(Long shopId, Long expireSeconds) {
+        // 1. 获取店铺
+        Shop shop = getById(shopId);
+        if (shop == null) {
+            return;
+        }
+        // 2. 封装逻辑过期时间
+        RedisData redisData = RedisData
+                .builder()
+                .data(shop)
+                .expireTime(LocalDateTime.now().plusSeconds(expireSeconds))
+                .build();
+        // 3. 写入redis
+        stringRedisTemplate.opsForValue().set(String.format("%s_%s", RedisConstants.SHOP, shopId), JSONUtil.toJsonStr(redisData));
     }
 
     private Boolean tryLock(String key) {

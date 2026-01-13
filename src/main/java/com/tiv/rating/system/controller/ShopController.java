@@ -28,4 +28,10 @@ public class ShopController {
         return ResultUtils.success();
     }
 
+    @PostMapping("/cache")
+    public BusinessResponse<?> cacheShop(@RequestParam Long shopId, Long expireSeconds) {
+        shopService.cacheShop(shopId, expireSeconds);
+        return ResultUtils.success();
+    }
+
 }
