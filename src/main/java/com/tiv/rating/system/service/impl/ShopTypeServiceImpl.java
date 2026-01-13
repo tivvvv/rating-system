@@ -25,7 +25,6 @@ public class ShopTypeServiceImpl extends ServiceImpl<ShopTypeMapper, ShopType> i
 
     @Override
     public List<ShopType> listShopType() {
-
         // 1. 查询redis缓存
         String shopTypeListCache = stringRedisTemplate
                 .opsForValue()

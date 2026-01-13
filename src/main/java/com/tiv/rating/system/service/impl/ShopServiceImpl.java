@@ -1,5 +1,6 @@
 package com.tiv.rating.system.service.impl;
 
+import cn.hutool.core.util.BooleanUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
@@ -24,29 +25,64 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements Sh
     private StringRedisTemplate stringRedisTemplate;
 
     @Override
-    public Shop getShopById(String id) {
+    public Shop getShopById(Long id) {
         // 1. 查询redis缓存
         String shopKey = String.format("%s_%s", RedisConstants.SHOP, id);
-        String shopCache = stringRedisTemplate.opsForValue().get(shopKey);
+        String shopCache = stringRedisTemplate
+                .opsForValue()
+                .get(shopKey);
         if (StrUtil.isNotBlank(shopCache)) {
             return JSONUtil.toBean(shopCache, Shop.class);
         }
 
         // 2. 缓存命中空值
-        if (shopCache != null) {
-            throw new BusinessException(BusinessCodeEnum.NOT_FOUND_ERROR, "店铺不存在");
+        if ("".equals(shopCache)) {
+            return null;
         }
 
-        // 3. 缓存不存在,查询数据库
-        Shop shop = getById(id);
-        if (shop == null) {
-            // 4. 数据库中不存在,将空值写入redis
-            stringRedisTemplate.opsForValue().set(shopKey, "", RedisConstants.NULL_TTL + RandomUtil.randomInt(RedisConstants.NULL_TTL), TimeUnit.MINUTES);
-            throw new BusinessException(BusinessCodeEnum.NOT_FOUND_ERROR, "店铺不存在");
-        }
-        // 5. 缓存
-        stringRedisTemplate.opsForValue().set(shopKey, JSONUtil.toJsonStr(shop), RedisConstants.SHOP_TTL + RandomUtil.randomInt(RedisConstants.SHOP_TTL), TimeUnit.MINUTES);
+        // 3. 缓存不存在,重建缓存
+        String lockKey = String.format("%s_%s", RedisConstants.LOCK_SHOP, id);
+        Shop shop = null;
+        try {
+            Boolean isLock = tryLock(lockKey);
+            if (!isLock) {
+                // 4. 获取锁失败,休眠后重试
+                Thread.sleep(50);
+                return getShopById(id);
+            }
 
+            // 5. 获取锁成功,二次检测缓存是否存在
+            shopCache = stringRedisTemplate
+                    .opsForValue()
+                    .get(shopKey);
+            if (StrUtil.isNotBlank(shopCache)) {
+                return JSONUtil.toBean(shopCache, Shop.class);
+            }
+
+            if ("".equals(shopCache)) {
+                return null;
+            }
+
+            // 6. 缓存不存在,查询数据库
+            shop = getById(id);
+            if (shop == null) {
+                // 7. 数据库中不存在,将空值写入redis
+                stringRedisTemplate
+                        .opsForValue()
+                        .set(shopKey, "", RedisConstants.NULL_TTL + RandomUtil.randomInt(RedisConstants.NULL_TTL), TimeUnit.MINUTES);
+                return null;
+            }
+            // 8. 存在,缓存
+            stringRedisTemplate
+                    .opsForValue()
+                    .set(shopKey, JSONUtil.toJsonStr(shop), RedisConstants.SHOP_TTL + RandomUtil.randomInt(RedisConstants.SHOP_TTL), TimeUnit.MINUTES);
+        } catch (Exception e) {
+            log.error("getShopById--重建缓存异常");
+            throw new BusinessException(BusinessCodeEnum.SYSTEM_ERROR, "getShopById--重建缓存异常");
+        } finally {
+            // 9. 释放锁
+            unlock(lockKey);
+        }
         return shop;
     }
 
@@ -62,6 +98,15 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements Sh
         updateById(shop);
         // 2. 清除缓存
         stringRedisTemplate.delete(String.format("%s_%s", RedisConstants.SHOP, shopId));
+    }
+
+    private Boolean tryLock(String key) {
+        Boolean flag = stringRedisTemplate.opsForValue().setIfAbsent(key, "1", 10, TimeUnit.SECONDS);
+        return BooleanUtil.isTrue(flag);
+    }
+
+    private void unlock(String key) {
+        stringRedisTemplate.delete(key);
     }
 
 }

@@ -18,7 +18,7 @@ public class ShopController {
     private ShopService shopService;
 
     @GetMapping("/{id}")
-    public BusinessResponse<Shop> getShopById(@PathVariable String id) {
+    public BusinessResponse<Shop> getShopById(@PathVariable Long id) {
         return ResultUtils.success(shopService.getShopById(id));
     }
 

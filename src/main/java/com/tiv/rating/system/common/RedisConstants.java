@@ -18,4 +18,6 @@ public interface RedisConstants {
 
     Integer NULL_TTL = 3;
 
+    String LOCK_SHOP = "lock_shop";
+
 }
