@@ -11,10 +11,10 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class RedisData {
+public class RedisData<T> {
 
     private LocalDateTime expireTime;
 
-    private Object data;
+    private T data;
 
 }
