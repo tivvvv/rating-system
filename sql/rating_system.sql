@@ -195,7 +195,7 @@ CREATE TABLE `voucher`
 DROP TABLE IF EXISTS `voucher_order`;
 CREATE TABLE `voucher_order`
 (
-    `id`          bigint(20) NOT NULL AUTO_INCREMENT COMMENT '主键id',
+    `id`          bigint(20) NOT NULL COMMENT '主键id',
     `user_id`     bigint(20) NOT NULL COMMENT '下单用户id',
     `voucher_id`  bigint(20) NOT NULL COMMENT '优惠券id',
     `pay_type`    tinyint(1) NOT NULL COMMENT '支付方式 1:余额支付,2:支付宝,3:微信',
