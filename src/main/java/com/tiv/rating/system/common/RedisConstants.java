@@ -20,4 +20,8 @@ public interface RedisConstants {
 
     String LOCK_SHOP = "lock_shop";
 
+    String VOUCHER_SECKILL_STOCK = "voucher_seckill_stock";
+
+    Long VOUCHER_SECKILL_STOCK_TTL = 7 * 24 * 60 * 60L;
+
 }

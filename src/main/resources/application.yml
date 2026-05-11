@@ -26,6 +26,8 @@ spring:
 
 mybatis-plus:
   type-aliases-package: com.tiv.rating.system.entity
+  configuration:
+    map-underscore-to-camel-case: true
 
 logging:
   level:

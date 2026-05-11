@@ -84,6 +84,24 @@ public class Voucher implements Serializable {
     @TableField(value = "update_time")
     private Date updateTime;
 
+    /**
+     * 库存
+     */
+    @TableField(exist = false)
+    private Integer stock;
+
+    /**
+     * 生效时间
+     */
+    @TableField(exist = false)
+    private Date beginTime;
+
+    /**
+     * 失效时间
+     */
+    @TableField(exist = false)
+    private Date endTime;
+
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;
 
