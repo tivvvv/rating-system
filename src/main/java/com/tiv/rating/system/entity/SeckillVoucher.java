@@ -15,25 +15,19 @@ import java.util.Date;
 /**
  * 优惠券秒杀表
  *
- * @TableName voucher_seckill
+ * @TableName seckill_voucher
  */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@TableName(value = "voucher_seckill")
-public class VoucherSeckill implements Serializable {
-
-    /**
-     * 主键id
-     */
-    @TableId(value = "id", type = IdType.AUTO)
-    private Long id;
+@TableName(value = "seckill_voucher")
+public class SeckillVoucher implements Serializable {
 
     /**
      * 优惠券的id
      */
-    @TableField(value = "voucher_id")
+    @TableId(value = "voucher_id", type = IdType.INPUT)
     private Long voucherId;
 
     /**

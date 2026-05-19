@@ -211,18 +211,16 @@ CREATE TABLE `voucher_order`
 ) COMMENT '优惠券订单表';
 
 -- ----------------------------
--- Table structure for voucher_seckill
+-- Table structure for seckill_voucher
 -- ----------------------------
-DROP TABLE IF EXISTS `voucher_seckill`;
-CREATE TABLE `voucher_seckill`
+DROP TABLE IF EXISTS `seckill_voucher`;
+CREATE TABLE `seckill_voucher`
 (
-    `id`          bigint(20) NOT NULL AUTO_INCREMENT COMMENT '主键id',
     `voucher_id`  bigint(20) NOT NULL COMMENT '优惠券的id',
     `stock`       int(10)    NOT NULL COMMENT '库存',
     `begin_time`  timestamp  NULL COMMENT '生效时间',
     `end_time`    timestamp  NULL COMMENT '失效时间',
     `create_time` timestamp  NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_time` timestamp  NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    PRIMARY KEY (`id`),
-    KEY `idx_voucher_id` (`voucher_id`)
-) COMMENT '优惠券秒杀表';
+    PRIMARY KEY (`voucher_id`)
+) COMMENT '秒杀优惠券表';

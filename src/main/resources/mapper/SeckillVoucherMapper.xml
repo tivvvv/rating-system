@@ -2,10 +2,9 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.tiv.rating.system.mapper.VoucherSeckillMapper">
+<mapper namespace="com.tiv.rating.system.mapper.SeckillVoucherMapper">
 
-    <resultMap id="BaseResultMap" type="com.tiv.rating.system.entity.VoucherSeckill">
-        <id property="id" column="id" jdbcType="BIGINT"/>
+    <resultMap id="BaseResultMap" type="com.tiv.rating.system.entity.SeckillVoucher">
         <result property="voucherId" column="voucher_id" jdbcType="BIGINT"/>
         <result property="stock" column="stock" jdbcType="INTEGER"/>
         <result property="beginTime" column="begin_time" jdbcType="TIMESTAMP"/>
@@ -15,7 +14,7 @@
     </resultMap>
 
     <sql id="Base_Column_List">
-        id,voucher_id,stock,
+        voucher_id,stock,
         begin_time,end_time,create_time,
         update_time
     </sql>

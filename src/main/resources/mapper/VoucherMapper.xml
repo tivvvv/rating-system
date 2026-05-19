@@ -10,7 +10,7 @@
                vs.begin_time,
                vs.end_time
         FROM voucher v
-                 LEFT JOIN voucher_seckill vs ON v.id = vs.voucher_id
+                 LEFT JOIN seckill_voucher vs ON v.id = vs.voucher_id
         WHERE v.shop_id = #{shopId}
     </select>
 
