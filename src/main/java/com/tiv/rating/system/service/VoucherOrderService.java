@@ -5,4 +5,6 @@ import com.tiv.rating.system.entity.VoucherOrder;
 
 public interface VoucherOrderService extends IService<VoucherOrder> {
 
+    Long seckillVoucher(Long voucherId);
+
 }
