@@ -10,6 +10,7 @@ import com.tiv.rating.system.service.SeckillVoucherService;
 import com.tiv.rating.system.service.VoucherOrderService;
 import com.tiv.rating.system.util.IdGenerator;
 import com.tiv.rating.system.util.UserHolder;
+import org.springframework.aop.framework.AopContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -45,7 +46,28 @@ public class VoucherOrderServiceImpl extends ServiceImpl<VoucherOrderMapper, Vou
         if (seckillVoucher.getStock() < 1) {
             throw new BusinessException(BusinessCodeEnum.OPERATION_ERROR, "库存不足");
         }
-        // 5. 扣减库存
+        Long userId = UserHolder.getUser().getId();
+        // 5. 按用户维度加锁,intern()保证获得同一引用
+        synchronized (userId.toString().intern()) {
+            // 6. 获取代理对象,避免事务失效
+            VoucherOrderService proxy = (VoucherOrderService) AopContext.currentProxy();
+            // 7. 创建订单
+            return proxy.createVoucherOrder(voucherId, userId);
+        }
+
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Long createVoucherOrder(Long voucherId, Long userId) {
+        // 1. 一人一单
+        int count = query().eq("voucher_id", voucherId)
+                .eq("user_id", userId)
+                .count();
+        if (count > 0) {
+            throw new BusinessException(BusinessCodeEnum.OPERATION_ERROR, "用户已购买过该优惠券");
+        }
+        // 2. 扣减库存
         boolean success = seckillVoucherService.update()
                 .setSql("stock = stock - 1")
                 .eq("voucher_id", voucherId)
@@ -54,9 +76,8 @@ public class VoucherOrderServiceImpl extends ServiceImpl<VoucherOrderMapper, Vou
         if (!success) {
             throw new BusinessException(BusinessCodeEnum.OPERATION_ERROR, "库存不足");
         }
-        // 6. 创建订单
+        // 3. 创建订单
         Long orderId = idGenerator.nextId("order");
-        Long userId = UserHolder.getUser().getId();
         VoucherOrder voucherOrder = VoucherOrder.builder()
                 .id(orderId)
                 .userId(userId)
