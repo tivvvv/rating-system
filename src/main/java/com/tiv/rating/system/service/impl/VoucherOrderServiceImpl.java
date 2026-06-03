@@ -9,8 +9,10 @@ import com.tiv.rating.system.mapper.VoucherOrderMapper;
 import com.tiv.rating.system.service.SeckillVoucherService;
 import com.tiv.rating.system.service.VoucherOrderService;
 import com.tiv.rating.system.util.IdGenerator;
+import com.tiv.rating.system.util.SimpleRedisLock;
 import com.tiv.rating.system.util.UserHolder;
 import org.springframework.aop.framework.AopContext;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +27,9 @@ public class VoucherOrderServiceImpl extends ServiceImpl<VoucherOrderMapper, Vou
 
     @Resource
     private IdGenerator idGenerator;
+
+    @Resource
+    private StringRedisTemplate stringRedisTemplate;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -46,15 +51,22 @@ public class VoucherOrderServiceImpl extends ServiceImpl<VoucherOrderMapper, Vou
         if (seckillVoucher.getStock() < 1) {
             throw new BusinessException(BusinessCodeEnum.OPERATION_ERROR, "库存不足");
         }
+
+        // 5. 获取分布式锁
         Long userId = UserHolder.getUser().getId();
-        // 5. 按用户维度加锁,intern()保证获得同一引用
-        synchronized (userId.toString().intern()) {
+        SimpleRedisLock lock = new SimpleRedisLock("order:" + userId, stringRedisTemplate);
+        if (!lock.tryLock(10 * 60L)) {
+            throw new BusinessException(BusinessCodeEnum.FORBIDDEN_ERROR, "请勿重复下单");
+        }
+
+        try {
             // 6. 获取代理对象,避免事务失效
             VoucherOrderService proxy = (VoucherOrderService) AopContext.currentProxy();
             // 7. 创建订单
             return proxy.createVoucherOrder(voucherId, userId);
+        } finally {
+            lock.unlock();
         }
-
     }
 
     @Override
