@@ -24,4 +24,6 @@ public interface RedisConstants {
 
     Long SECKILL_VOUCHER_STOCK_TTL = 7 * 24 * 60 * 60L;
 
+    String SECKILL_VOUCHER_ORDER = "seckill_voucher_order";
+
 }

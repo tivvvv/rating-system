@@ -2,7 +2,6 @@ package com.tiv.rating.system.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.tiv.rating.system.common.BusinessException;
-import com.tiv.rating.system.entity.SeckillVoucher;
 import com.tiv.rating.system.entity.VoucherOrder;
 import com.tiv.rating.system.enums.BusinessCodeEnum;
 import com.tiv.rating.system.mapper.VoucherOrderMapper;
@@ -10,14 +9,16 @@ import com.tiv.rating.system.service.SeckillVoucherService;
 import com.tiv.rating.system.service.VoucherOrderService;
 import com.tiv.rating.system.util.IdGenerator;
 import com.tiv.rating.system.util.UserHolder;
-import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
-import org.springframework.aop.framework.AopContext;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.util.Date;
+import java.util.Collections;
 
 @Service
 public class VoucherOrderServiceImpl extends ServiceImpl<VoucherOrderMapper, VoucherOrder> implements VoucherOrderService {
@@ -31,42 +32,28 @@ public class VoucherOrderServiceImpl extends ServiceImpl<VoucherOrderMapper, Vou
     @Resource
     private RedissonClient redissonClient;
 
+    private static final DefaultRedisScript<Integer> SECKILL_SCRIPT;
+
+    static {
+        SECKILL_SCRIPT = new DefaultRedisScript<>();
+        SECKILL_SCRIPT.setLocation(new ClassPathResource("lua/seckill.lua"));
+        SECKILL_SCRIPT.setResultType(Integer.class);
+    }
+
+    @Autowired
+    private StringRedisTemplate stringRedisTemplate;
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Long seckillVoucher(Long voucherId) {
-        // 1. 查询秒杀优惠券
-        SeckillVoucher seckillVoucher = seckillVoucherService.getById(voucherId);
-        // 2. 判断秒杀优惠券是否存在
-        if (seckillVoucher == null) {
-            throw new BusinessException(BusinessCodeEnum.NOT_FOUND_ERROR, "秒杀优惠券不存在");
-        }
-        // 3. 判断秒杀优惠券是否处于可用状态
-        if (seckillVoucher.getBeginTime().after(new Date())) {
-            throw new BusinessException(BusinessCodeEnum.FORBIDDEN_ERROR, "秒杀尚未开始");
-        }
-        if (seckillVoucher.getEndTime().before(new Date())) {
-            throw new BusinessException(BusinessCodeEnum.FORBIDDEN_ERROR, "秒杀已结束");
-        }
-        // 4. 判断库存是否充足
-        if (seckillVoucher.getStock() < 1) {
-            throw new BusinessException(BusinessCodeEnum.OPERATION_ERROR, "库存不足");
-        }
-
-        // 5. 获取分布式锁
+        // 1. 获取当前用户
         Long userId = UserHolder.getUser().getId();
-        RLock lock = redissonClient.getLock("lock:order:" + userId);
-        if (!lock.tryLock()) {
-            throw new BusinessException(BusinessCodeEnum.FORBIDDEN_ERROR, "请勿重复下单");
+        // 2. 执行lua脚本
+        Integer result = stringRedisTemplate.execute(SECKILL_SCRIPT, Collections.emptyList(), voucherId.toString(), userId.toString());
+        if (result != 0) {
+            throw new BusinessException(BusinessCodeEnum.OPERATION_ERROR, result == 1 ? "库存不足" : "已购买过该优惠券");
         }
-
-        try {
-            // 6. 获取代理对象,避免事务失效
-            VoucherOrderService proxy = (VoucherOrderService) AopContext.currentProxy();
-            // 7. 创建订单
-            return proxy.createVoucherOrder(voucherId, userId);
-        } finally {
-            lock.unlock();
-        }
+        return idGenerator.nextId("order");
     }
 
     @Override
