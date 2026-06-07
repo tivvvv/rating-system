@@ -1,0 +1,1 @@
+redis-cli XGROUP CREATE rating_system:stream:orders g1 0 MKSTREAM

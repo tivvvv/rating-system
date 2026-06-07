@@ -26,4 +26,6 @@ public interface RedisConstants {
 
     String SECKILL_VOUCHER_ORDER = "seckill_voucher_order";
 
+    String QUEUE_NAME = "rating_system:stream:orders";
+
 }
