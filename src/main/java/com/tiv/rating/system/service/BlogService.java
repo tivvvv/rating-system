@@ -7,4 +7,6 @@ public interface BlogService extends IService<Blog> {
 
     Long saveBlog(Blog blog);
 
+    Blog getBlogById(Long id);
+
 }

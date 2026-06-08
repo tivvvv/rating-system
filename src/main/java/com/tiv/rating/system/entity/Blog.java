@@ -72,6 +72,18 @@ public class Blog implements Serializable {
     @TableField(value = "update_time")
     private Date updateTime;
 
+    /**
+     * 用户名
+     */
+    @TableField(exist = false)
+    private String userName;
+
+    /**
+     * 用户头像
+     */
+    @TableField(exist = false)
+    private String userIcon;
+
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;
 

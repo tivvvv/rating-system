@@ -28,4 +28,9 @@ public class BlogController {
         return ResultUtils.success();
     }
 
+    @GetMapping("/{id}")
+    public BusinessResponse<?> getBlogById(@PathVariable Long id) {
+        return ResultUtils.success(blogService.getBlogById(id));
+    }
+
 }
