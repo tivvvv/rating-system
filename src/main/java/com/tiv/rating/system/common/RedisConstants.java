@@ -28,4 +28,6 @@ public interface RedisConstants {
 
     String QUEUE_NAME = "rating_system:stream:orders";
 
+    String BLOG_LIKE = "blog_like";
+
 }

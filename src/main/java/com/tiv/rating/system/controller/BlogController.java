@@ -33,4 +33,10 @@ public class BlogController {
         return ResultUtils.success(blogService.getBlogById(id));
     }
 
+    @PutMapping("/like/{id}")
+    public BusinessResponse<?> likeBlog(@PathVariable Long id) {
+        blogService.likeBlog(id);
+        return ResultUtils.success();
+    }
+
 }

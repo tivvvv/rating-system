@@ -9,4 +9,5 @@ public interface BlogService extends IService<Blog> {
 
     Blog getBlogById(Long id);
 
+    void likeBlog(Long id);
 }

@@ -84,6 +84,12 @@ public class Blog implements Serializable {
     @TableField(exist = false)
     private String userIcon;
 
+    /**
+     * 是否已点赞
+     */
+    @TableField(exist = false)
+    private Boolean isLiked;
+
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;
 
