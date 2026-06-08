@@ -22,6 +22,12 @@ public class ShopController {
         return ResultUtils.success(shopService.getShopById(id));
     }
 
+    @PostMapping
+    public BusinessResponse<Long> saveShop(@RequestBody Shop shop) {
+        shopService.save(shop);
+        return ResultUtils.success(shop.getId());
+    }
+
     @PutMapping
     public BusinessResponse<?> updateShop(@RequestBody Shop shop) {
         shopService.updateShop(shop);
