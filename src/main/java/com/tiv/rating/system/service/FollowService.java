@@ -5,4 +5,26 @@ import com.tiv.rating.system.entity.Follow;
 
 public interface FollowService extends IService<Follow> {
 
+    /**
+     * 关注指定用户
+     *
+     * @param followUserId 被关注的用户id
+     */
+    void follow(Long followUserId);
+
+    /**
+     * 取消关注指定用户
+     *
+     * @param followUserId 被取关的用户id
+     */
+    void unfollow(Long followUserId);
+
+    /**
+     * 查询当前登录用户是否已关注指定用户
+     *
+     * @param followUserId 目标用户id
+     * @return true-已关注, false-未关注
+     */
+    Boolean isFollow(Long followUserId);
+
 }
