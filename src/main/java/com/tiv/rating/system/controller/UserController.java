@@ -1,8 +1,10 @@
 package com.tiv.rating.system.controller;
 
+import cn.hutool.core.bean.BeanUtil;
 import com.tiv.rating.system.common.BusinessResponse;
 import com.tiv.rating.system.dto.LoginDTO;
 import com.tiv.rating.system.dto.UserDTO;
+import com.tiv.rating.system.entity.User;
 import com.tiv.rating.system.service.UserService;
 import com.tiv.rating.system.util.ResultUtils;
 import com.tiv.rating.system.util.UserHolder;
@@ -33,6 +35,15 @@ public class UserController {
     @GetMapping("/info")
     public BusinessResponse<UserDTO> info() {
         return ResultUtils.success(UserHolder.getUser());
+    }
+
+    @GetMapping("/{id}")
+    public BusinessResponse<UserDTO> getUserById(@PathVariable Long id) {
+        User user = userService.getById(id);
+        if (user == null) {
+            return ResultUtils.success();
+        }
+        return ResultUtils.success(BeanUtil.copyProperties(user, UserDTO.class));
     }
 
 }

@@ -3,8 +3,10 @@ package com.tiv.rating.system.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.StrUtil;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.tiv.rating.system.common.BusinessException;
+import com.tiv.rating.system.common.CommonConstants;
 import com.tiv.rating.system.common.RedisConstants;
 import com.tiv.rating.system.dto.UserDTO;
 import com.tiv.rating.system.entity.Blog;
@@ -122,6 +124,20 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements Bl
                 .stream()
                 .map(user -> BeanUtil.copyProperties(user, UserDTO.class))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Page<Blog> getBlogByUser(Long userId, Long current, Long size) {
+        // 1. 页码兜底
+        long pageNum = (current == null || current < 1) ? 1L : current;
+        // 2. 每页条数兜底
+        long pageSize = (size == null || size < 1)
+                ? CommonConstants.DEFAULT_PAGE_SIZE
+                : Math.min(size, CommonConstants.MAX_PAGE_SIZE);
+        // 3. 按发布时间倒序分页查询用户的笔记
+        return query().eq("user_id", userId)
+                .orderByDesc("create_time", "id")
+                .page(new Page<>(pageNum, pageSize));
     }
 
 }

@@ -1,5 +1,6 @@
 package com.tiv.rating.system.controller;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.tiv.rating.system.common.BusinessResponse;
 import com.tiv.rating.system.dto.UserDTO;
 import com.tiv.rating.system.entity.Blog;
@@ -33,6 +34,14 @@ public class BlogController {
     @GetMapping("/{id}")
     public BusinessResponse<?> getBlogById(@PathVariable Long id) {
         return ResultUtils.success(blogService.getBlogById(id));
+    }
+
+    @GetMapping("/user/{userId}")
+    public BusinessResponse<Page<Blog>> getBlogByUser(
+            @PathVariable Long userId,
+            @RequestParam(value = "current", required = false) Long current,
+            @RequestParam(value = "size", required = false) Long size) {
+        return ResultUtils.success(blogService.getBlogByUser(userId, current, size));
     }
 
     @PutMapping("/like/{id}")
