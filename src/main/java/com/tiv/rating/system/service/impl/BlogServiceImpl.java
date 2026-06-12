@@ -10,10 +10,12 @@ import com.tiv.rating.system.common.CommonConstants;
 import com.tiv.rating.system.common.RedisConstants;
 import com.tiv.rating.system.dto.UserDTO;
 import com.tiv.rating.system.entity.Blog;
+import com.tiv.rating.system.entity.Follow;
 import com.tiv.rating.system.entity.User;
 import com.tiv.rating.system.enums.BusinessCodeEnum;
 import com.tiv.rating.system.mapper.BlogMapper;
 import com.tiv.rating.system.service.BlogService;
+import com.tiv.rating.system.service.FollowService;
 import com.tiv.rating.system.service.UserService;
 import com.tiv.rating.system.util.UserHolder;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -32,6 +34,9 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements Bl
     private UserService userService;
 
     @Resource
+    private FollowService followService;
+
+    @Resource
     private StringRedisTemplate stringRedisTemplate;
 
     @Override
@@ -40,8 +45,26 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements Bl
         UserDTO user = UserHolder.getUser();
         blog.setUserId(user.getId());
         // 2. 保存笔记
-        save(blog);
+        boolean saveSuccess = save(blog);
+        if (!saveSuccess) {
+            throw new BusinessException(BusinessCodeEnum.OPERATION_ERROR, "保存笔记失败");
+        }
+        // 3. 查询粉丝
+        List<Follow> follows = followService.query()
+                .eq("follow_user_id", user.getId())
+                .list();
+        // 4. 给每个粉丝推送笔记消息
+        for (Follow follow : follows) {
+            Long userId = follow.getUserId();
+            String feedKey = getFeedKey(userId);
+            stringRedisTemplate.opsForZSet().add(feedKey, blog.getId().toString(), System.currentTimeMillis());
+        }
+
         return blog.getId();
+    }
+
+    private String getFeedKey(Long userId) {
+        return RedisConstants.FEED_KEY + userId;
     }
 
     @Override

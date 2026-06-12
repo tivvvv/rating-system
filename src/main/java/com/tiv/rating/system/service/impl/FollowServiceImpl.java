@@ -109,7 +109,7 @@ public class FollowServiceImpl extends ServiceImpl<FollowMapper, Follow> impleme
     }
 
     private String getFollowSetKey(Long userId) {
-        return RedisConstants.FOLLOW + userId;
+        return RedisConstants.FOLLOW_KEY + userId;
     }
 
     /**
