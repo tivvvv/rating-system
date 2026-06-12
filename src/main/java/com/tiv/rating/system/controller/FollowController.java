@@ -1,12 +1,14 @@
 package com.tiv.rating.system.controller;
 
 import com.tiv.rating.system.common.BusinessResponse;
+import com.tiv.rating.system.dto.UserDTO;
 import com.tiv.rating.system.service.FollowService;
 import com.tiv.rating.system.util.ResultUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -40,6 +42,14 @@ public class FollowController {
     @GetMapping("/{followUserId}")
     public BusinessResponse<Boolean> isFollow(@PathVariable Long followUserId) {
         return ResultUtils.success(followService.isFollow(followUserId));
+    }
+
+    /**
+     * 查询与目标用户的共同关注
+     */
+    @GetMapping("/common/{targetUserId}")
+    public BusinessResponse<List<UserDTO>> getCommonFollows(@PathVariable Long targetUserId) {
+        return ResultUtils.success(followService.getCommonFollows(targetUserId));
     }
 
 }

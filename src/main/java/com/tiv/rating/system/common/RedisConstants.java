@@ -30,4 +30,8 @@ public interface RedisConstants {
 
     String BLOG_LIKE = "blog_like";
 
+    String FOLLOW = "follow:user:";
+
+    Long FOLLOW_TTL = 24 * 60 * 60L;
+
 }
