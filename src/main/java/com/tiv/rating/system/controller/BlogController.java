@@ -2,6 +2,7 @@ package com.tiv.rating.system.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.tiv.rating.system.common.BusinessResponse;
+import com.tiv.rating.system.dto.ScrollDTO;
 import com.tiv.rating.system.dto.UserDTO;
 import com.tiv.rating.system.entity.Blog;
 import com.tiv.rating.system.service.BlogService;
@@ -42,6 +43,14 @@ public class BlogController {
             @RequestParam(value = "current", required = false) Long current,
             @RequestParam(value = "size", required = false) Long size) {
         return ResultUtils.success(blogService.getBlogByUser(userId, current, size));
+    }
+
+    @GetMapping("/follow")
+    public BusinessResponse<ScrollDTO<Blog>> getBlogByFollow(
+            @RequestParam Long lastId,
+            @RequestParam Integer offset,
+            @RequestParam(value = "size", required = false) Long size) {
+        return ResultUtils.success(blogService.getBlogByFollow(lastId, offset, size));
     }
 
     @PutMapping("/like/{id}")

@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.tiv.rating.system.common.BusinessException;
 import com.tiv.rating.system.common.CommonConstants;
 import com.tiv.rating.system.common.RedisConstants;
+import com.tiv.rating.system.dto.ScrollDTO;
 import com.tiv.rating.system.dto.UserDTO;
 import com.tiv.rating.system.entity.Blog;
 import com.tiv.rating.system.entity.Follow;
@@ -19,12 +20,11 @@ import com.tiv.rating.system.service.FollowService;
 import com.tiv.rating.system.service.UserService;
 import com.tiv.rating.system.util.UserHolder;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -161,6 +161,46 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements Bl
         return query().eq("user_id", userId)
                 .orderByDesc("create_time", "id")
                 .page(new Page<>(pageNum, pageSize));
+    }
+
+    @Override
+    public ScrollDTO<Blog> getBlogByFollow(Long lastId, Integer offset, Long size) {
+        // 1. 获取登录用户
+        Long userId = UserHolder.getUser().getId();
+        // 2. 查询收件箱
+        long pageSize = (size == null || size < 1)
+                ? CommonConstants.DEFAULT_PAGE_SIZE
+                : Math.min(size, CommonConstants.MAX_PAGE_SIZE);
+        String feedKey = getFeedKey(userId);
+        Set<ZSetOperations.TypedTuple<String>> typedTuples = stringRedisTemplate.opsForZSet()
+                .reverseRangeByScoreWithScores(feedKey, 0, lastId, offset, pageSize);
+        // 3. 解析数据
+        if (CollectionUtil.isEmpty(typedTuples)) {
+            return new ScrollDTO<>();
+        }
+        List<Long> blogIds = new ArrayList<>(typedTuples.size());
+        int newOffset = 1;
+        long minTime = System.currentTimeMillis();
+        for (ZSetOperations.TypedTuple<String> tuple : typedTuples) {
+            blogIds.add(Long.valueOf(Objects.requireNonNull(tuple.getValue())));
+            long time = Objects.requireNonNull(tuple.getScore()).longValue();
+            if (time == minTime) {
+                newOffset++;
+            } else {
+                minTime = time;
+                newOffset = 1;
+            }
+        }
+        // 4. 查询笔记
+        String blogIdStr = StrUtil.join(",", blogIds);
+        List<Blog> blogs = query().in("id", blogIds)
+                .last("ORDER BY FIELD(id, " + blogIdStr + ")")
+                .list();
+        for (Blog blog : blogs) {
+            populateBlogUser(blog);
+            populateBlogIsLiked(blog);
+        }
+        return new ScrollDTO<>(blogs, lastId, newOffset);
     }
 
 }

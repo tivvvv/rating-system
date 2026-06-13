@@ -2,6 +2,7 @@ package com.tiv.rating.system.service;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.tiv.rating.system.dto.ScrollDTO;
 import com.tiv.rating.system.dto.UserDTO;
 import com.tiv.rating.system.entity.Blog;
 
@@ -18,4 +19,6 @@ public interface BlogService extends IService<Blog> {
     List<UserDTO> getBlogLikeUsers(Long id);
 
     Page<Blog> getBlogByUser(Long userId, Long current, Long size);
+
+    ScrollDTO<Blog> getBlogByFollow(Long lastId, Integer offset, Long size);
 }
