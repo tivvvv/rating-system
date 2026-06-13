@@ -13,6 +13,7 @@ import com.tiv.rating.system.entity.Shop;
 import com.tiv.rating.system.enums.BusinessCodeEnum;
 import com.tiv.rating.system.mapper.ShopMapper;
 import com.tiv.rating.system.service.ShopService;
+import org.springframework.data.geo.Point;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -126,6 +127,20 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements Sh
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    public Long addShop(Shop shop) {
+        // 1. 保存店铺到数据库
+        save(shop);
+        // 2. 将店铺坐标按店铺类型写入redis geo
+        if (shop.getTypeId() != null && shop.getLongitude() != null && shop.getLatitude() != null) {
+            String geoKey = getGeoKey(shop.getTypeId());
+            stringRedisTemplate.opsForGeo()
+                    .add(geoKey, new Point(shop.getLongitude(), shop.getLatitude()), shop.getId().toString());
+        }
+        return shop.getId();
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
     public void updateShop(Shop shop) {
         Long shopId = shop.getId();
         if (shopId == null) {
@@ -146,6 +161,10 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements Sh
 
     private void unlock(String key) {
         stringRedisTemplate.delete(key);
+    }
+
+    private String getGeoKey(Long shopTypeId) {
+        return RedisConstants.SHOP_GEO_KEY + shopTypeId;
     }
 
 }

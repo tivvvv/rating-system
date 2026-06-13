@@ -36,4 +36,6 @@ public interface RedisConstants {
 
     String FEED_KEY = "feed:";
 
+    String SHOP_GEO_KEY = "shop:geo:";
+
 }
