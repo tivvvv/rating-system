@@ -51,14 +51,14 @@ public class Shop implements Serializable {
     /**
      * 经度
      */
-    @TableField(value = "latitude")
-    private Double latitude;
+    @TableField(value = "longitude")
+    private Double longitude;
 
     /**
      * 纬度
      */
-    @TableField(value = "longitude")
-    private Double longitude;
+    @TableField(value = "latitude")
+    private Double latitude;
 
     /**
      * 均价

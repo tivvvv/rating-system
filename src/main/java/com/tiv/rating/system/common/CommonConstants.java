@@ -16,4 +16,9 @@ public interface CommonConstants {
      */
     Long MAX_PAGE_SIZE = 100L;
 
+    /**
+     * 附近店铺的默认查询半径/m
+     */
+    Double DEFAULT_GEO_SEARCH_RADIUS_METERS = 5000D;
+
 }
