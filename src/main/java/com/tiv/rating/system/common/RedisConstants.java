@@ -38,4 +38,6 @@ public interface RedisConstants {
 
     String SHOP_GEO_KEY = "shop:geo:";
 
+    String SIGN_KEY = "sign:";
+
 }

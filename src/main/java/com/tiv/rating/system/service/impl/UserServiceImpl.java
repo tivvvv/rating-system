@@ -15,11 +15,14 @@ import com.tiv.rating.system.mapper.UserMapper;
 import com.tiv.rating.system.service.UserService;
 import com.tiv.rating.system.util.RegexUtils;
 import com.tiv.rating.system.util.ResultUtils;
+import com.tiv.rating.system.util.UserHolder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -83,6 +86,22 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
         // 7. 返回token
         return token;
+    }
+
+    @Override
+    public void sign() {
+        // 1. 获取登录用户
+        Long userId = UserHolder.getUser().getId();
+
+        // 2. 获取当前日期
+        LocalDateTime now = LocalDateTime.now();
+        String signKey = RedisConstants.SIGN_KEY + userId + now.format(DateTimeFormatter.ofPattern(":yyyyMM"));
+
+        // 3. 获取现在是当前月的第几天
+        int dayOfMonth = now.getDayOfMonth();
+
+        // 4. 写入redis bitmap
+        stringRedisTemplate.opsForValue().setBit(signKey, dayOfMonth - 1, true);
     }
 
     private User createUserWithPhone(String phone) {
