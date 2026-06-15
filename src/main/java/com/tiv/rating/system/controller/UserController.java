@@ -52,4 +52,9 @@ public class UserController {
         return ResultUtils.success();
     }
 
+    @GetMapping("/sign/count")
+    public BusinessResponse<Integer> signCount() {
+        return ResultUtils.success(userService.signCount());
+    }
+
 }

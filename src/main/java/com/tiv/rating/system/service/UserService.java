@@ -12,4 +12,6 @@ public interface UserService extends IService<User> {
 
     void sign();
 
+    Integer signCount();
+
 }
